@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import '../styles/PDFUploader.css'
 
 interface UploadedFile {
@@ -9,6 +12,124 @@ interface UploadedFile {
   status: 'pending' | 'uploading' | 'completed' | 'error'
   errorMessage?: string
   responseData?: any // Field to store the webhook's JSON response
+}
+
+const InteractiveFlashcard = ({ card }: { card: any }) => {
+  const [isFlipped, setIsFlipped] = useState(false)
+  return (
+    <Card 
+      className="w-full h-48 cursor-pointer hover:shadow-md transition-all flex flex-col justify-center" 
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <CardContent className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+        {!isFlipped ? (
+          <>
+            <h3 className="font-bold text-lg mb-2 text-foreground">{card.term}</h3>
+            {card.context_hint && <p className="text-sm text-muted-foreground italic">Hint: {card.context_hint}</p>}
+            <p className="text-xs text-muted-foreground mt-auto pt-4">Click to reveal definition</p>
+          </>
+        ) : (
+          <>
+            <p className="text-md font-medium text-foreground">{card.definition}</p>
+            <p className="text-xs text-muted-foreground mt-auto pt-4">Click to show term</p>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+const InteractiveQuiz = ({ q, index }: { q: any, index: number }) => {
+  const [selected, setSelected] = useState<string | null>(null)
+  const options = useMemo(() => {
+    const opts = [...(q.distractors || []), q.correct_answer]
+    return opts.sort(() => Math.random() - 0.5)
+  }, [q])
+
+  return (
+    <Card className="mb-4 shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex justify-between items-start leading-snug">
+          <span>{index + 1}. {q.question_text}</span>
+          <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full whitespace-nowrap ml-4">
+            Level {q.difficulty}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-2">
+          {options.map((opt) => {
+            const isSelected = selected === opt
+            const isCorrect = opt === q.correct_answer
+            const showResult = selected !== null
+            
+            let btnVariant = "outline"
+            let extraClass = "justify-start text-left h-auto py-3 px-4 font-normal whitespace-normal "
+            
+            if (showResult) {
+              if (isCorrect) {
+                extraClass += "bg-green-600 hover:bg-green-700 text-white border-green-600 "
+              } else if (isSelected) {
+                extraClass += "bg-red-600 hover:bg-red-700 text-white border-red-600 "
+              } else {
+                extraClass += "opacity-50 "
+              }
+            } else if (isSelected) {
+              btnVariant = "secondary"
+            }
+
+            return (
+              <Button 
+                key={opt}
+                variant={btnVariant as any} 
+                className={extraClass}
+                disabled={showResult}
+                onClick={() => setSelected(opt)}
+              >
+                {opt}
+              </Button>
+            )
+          })}
+        </div>
+        {selected && q.pedagogical_explanation && (
+          <div className="mt-4 p-4 bg-muted text-muted-foreground rounded-md text-sm border-l-4 border-primary">
+            <strong className="text-foreground">Explanation: </strong> 
+            {q.pedagogical_explanation}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+const RevisionTimeline = ({ plan }: { plan: any[] }) => {
+  return (
+    <div className="relative border-l-2 border-muted ml-4 py-2">
+      {plan.map((stage: any, index: number) => (
+        <div key={index} className="mb-8 ml-6 relative">
+          <span className="absolute -left-[33px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary ring-4 ring-background"></span>
+          <h4 className="font-semibold text-base leading-none mb-2 text-foreground">
+            Step {stage.step_number}: {stage.module_title}
+          </h4>
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-3">
+            <span className="bg-secondary px-2 py-1 rounded-md font-medium">⏱ {stage.duration_minutes} mins</span>
+            <span className={`px-2 py-1 rounded-md font-medium ${
+              stage.priority === 'High' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 
+              stage.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 
+              'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+            }`}>Priority: {stage.priority}</span>
+          </div>
+          {stage.key_learning_objectives && stage.key_learning_objectives.length > 0 && (
+            <ul className="list-disc ml-4 text-sm text-muted-foreground space-y-1">
+              {stage.key_learning_objectives.map((obj: string, idx: number) => (
+                <li key={idx}>{obj}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function PDFUploader() {
@@ -303,60 +424,51 @@ export function PDFUploader() {
                     }
 
                     return (
-                      <div className="response-content-summary">
-                        <h4>Generated Content:</h4>
+                      <div className="response-content-summary mt-6 pt-4 border-t border-border w-full text-left">
+                        <h4 className="text-xl font-bold mb-4 text-foreground">Generated Study Materials</h4>
+                        
+                        <Accordion type="multiple" className="w-full">
+                          {revisionPlan.length > 0 && (
+                            <AccordionItem value="revision">
+                              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                                Revision Strategy
+                              </AccordionTrigger>
+                              <AccordionContent className="pt-4 pb-2">
+                                <RevisionTimeline plan={revisionPlan} />
+                              </AccordionContent>
+                            </AccordionItem>
+                          )}
 
-                        {revisionPlan.length > 0 && (
-                          <div className="generated-section">
-                            <h5>Revision Strategy</h5>
-                            {revisionPlan.map((stage: any, index: number) => (
-                              <div key={index} className="revision-stage-item">
-                                <p><strong>Step {stage.step_number}: {stage.module_title}</strong></p>
-                                <p><em>Duration: {stage.duration_minutes} mins | Priority: {stage.priority}</em></p>
-                                {stage.key_learning_objectives && stage.key_learning_objectives.length > 0 && (
-                                  <ul>
-                                    {stage.key_learning_objectives.map((obj: string, objIndex: number) => (
-                                      <li key={objIndex}>{obj}</li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {flashcards.length > 0 && (
-                          <div className="generated-section">
-                            <h5>Flashcards</h5>
-                            <div className="flashcards-list">
-                              {flashcards.map((card: any, index: number) => (
-                                <div key={index} className="flashcard-item">
-                                  <p><strong>Term:</strong> {card.term}</p>
-                                  <p><strong>Definition:</strong> {card.definition}</p>
-                                  {card.context_hint && <p className="flashcard-context"><em>Context:</em> {card.context_hint}</p>}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {quiz.length > 0 && (
-                          <div className="generated-section">
-                            <h5>Quiz</h5>
-                            {quiz.map((q: any, index: number) => (
-                              <div key={index} className="quiz-question-item">
-                                <p><strong>Question {index + 1} (Difficulty {q.difficulty}):</strong> {q.question_text}</p>
-                                <ul>
-                                  <li><strong>✓ {q.correct_answer}</strong></li>
-                                  {q.distractors?.map((distractor: string, optIndex: number) => (
-                                    <li key={optIndex}>{distractor}</li>
+                          {flashcards.length > 0 && (
+                            <AccordionItem value="flashcards">
+                              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                                Interactive Flashcards
+                              </AccordionTrigger>
+                              <AccordionContent className="pt-4 pb-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {flashcards.map((card: any, index: number) => (
+                                    <InteractiveFlashcard key={index} card={card} />
                                   ))}
-                                </ul>
-                                {q.pedagogical_explanation && <p className="quiz-explanation"><em>Explanation:</em> {q.pedagogical_explanation}</p>}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          )}
+
+                          {quiz.length > 0 && (
+                            <AccordionItem value="quiz">
+                              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                                Practice Quiz
+                              </AccordionTrigger>
+                              <AccordionContent className="pt-4 pb-2">
+                                <div className="max-w-3xl mx-auto">
+                                  {quiz.map((q: any, index: number) => (
+                                    <InteractiveQuiz key={index} q={q} index={index} />
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          )}
+                        </Accordion>
                       </div>
                     );
                   })()}
