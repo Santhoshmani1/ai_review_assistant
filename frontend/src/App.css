@@ -1,17 +1,185 @@
-/* App-level styles */
-* {
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-#root {
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.upload-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .upload-section {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn:hover { background-color: #2563eb; }
+.btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+.btn-secondary { background-color: #10b981; }
+.btn-secondary:hover { background-color: #059669; }
+
+.error-message {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.section-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.section-container h2 {
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-top: 0;
+  color: #1f2937;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #111827;
+  font-size: 1.25rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #dbeafe;
+  color: #1e40af;
+  margin-right: 0.5rem;
+}
+
+.badge.high { background-color: #fee2e2; color: #991b1b; }
+.badge.medium { background-color: #fef3c7; color: #92400e; }
+.badge.low { background-color: #d1fae5; color: #065f46; }
+
+.text-muted { color: #6b7280; font-size: 0.875rem; }
+
+/* --- New Sleek UI Enhancements --- */
+
+.file-input-wrapper {
+  position: relative;
+  flex-grow: 1;
   width: 100%;
-  height: 100%;
+}
+.file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+.file-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border: 2px dashed #93c5fd;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: #2563eb;
+  transition: all 0.2s ease;
+}
+.file-label:hover { background: #eff6ff; border-color: #2563eb; }
+.file-label.has-file { background: #dbeafe; border: 2px solid #3b82f6; }
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.spinner {
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.skeleton-card { animation: pulse 1.5s infinite; border-color: #f3f4f6; }
+.skeleton-line {
+  height: 1rem;
+  background-color: #e5e7eb;
+  border-radius: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+.skeleton-line.title { height: 1.5rem; width: 70%; margin-bottom: 1rem; }
+.skeleton-line.badge { height: 1.25rem; width: 40%; border-radius: 9999px; }
+.skeleton-line.short { width: 50%; }
+
+.pulse-text { font-size: 0.9rem; font-weight: normal; animation: pulse 1.5s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
