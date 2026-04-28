@@ -1,0 +1,834 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "enableStreaming": false
+        }
+      },
+      "id": "8051c7c9-acdb-4130-8feb-09bb8b9b9ac4",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2544,
+        480
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        496
+      ],
+      "id": "39238dba-7f74-421c-ae8e-08d21a5b79f0",
+      "name": "Extract from File",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "notesInFlow": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "react-app",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "9888f5df-19b6-4988-9ddd-5c3762561c50",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        496
+      ],
+      "webhookId": "c6258594-dd63-40ce-bf9f-0b5a4164c259",
+      "alwaysOutputData": true,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "z gdmykr,i5utsmhfnetjs46jr"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1216,
+        224
+      ],
+      "id": "01bd0afd-e251-435e-91ab-28b2c2827a2e",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "z gdmykr,i5utsmhfnetjs46jr"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        656
+      ],
+      "id": "22ddafc5-b061-4887-853f-f2231ff2dd18",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "z gdmykr,i5utsmhfnetjs46jr"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        1152
+      ],
+      "id": "463cf40b-14c7-4d11-b74c-f6e0a12278c4",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2192,
+        464
+      ],
+      "id": "b616f5e0-03df-4efb-8818-a5c1ce90d756",
+      "name": "Merge1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Extract from File').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an Educational Psychometrician.\nTask: Generate a high-quality Multiple Choice Quiz based on the source text using Bloom's Taxonomy.\nConstraints:\n\nInclude a mix of difficulty levels (1-5).\n\nDistractor Logic: Create 3 incorrect options that represent common misconceptions or related but incorrect terms.\n\nExplanation: Write a \"Pedagogical Explanation\" for the correct answer to reinforce learning.\n\nOutput Format: STRICT JSON only. No prose."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1216,
+        992
+      ],
+      "id": "ab398861-5b59-4c32-a03b-43e63118b8bc",
+      "name": "Quiz Agent",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Extract from File').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Memory Specialist and Flashcard Designer.\nTask: Convert the provided text into a series of \"Atomic\" flashcards.\nConstraints:\n\nAtomic Principle: Each card must contain only ONE specific fact or concept.\n\nContext Hint: Provide a clue that helps the user recall the answer without giving it away.\n\nAvoid long definitions; keep answers punchy and easy to memorize.\n\nOutput Format: STRICT JSON only. No prose."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1184,
+        480
+      ],
+      "id": "edeeffbf-7016-471b-b0e8-c1d1a2dff76a",
+      "name": "Flashcards agent",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Extract from File').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an Expert Academic Strategist specializing in Cognitive Load Theory.\nTask: Analyze the provided text and design a structured, phase-based revision plan.\nConstraints:\n\nBreakdown the content into logical study modules (e.g., Introduction, Core Mechanics, Advanced Application).\n\nAssign a priority level based on the complexity of the concepts.\n\nEnsure duration_minutes are realistic for a college-level student.\n\nOutput Format: STRICT JSON only. No prose.\n\nSchema:\n\nJSON\n{\n  \"revision_plan\": [\n    {\n      \"step_number\": \"integer\",\n      \"module_title\": \"string\",\n      \"key_learning_objectives\": [\"string\"],\n      \"duration_minutes\": \"integer\",\n      \"priority\": \"High|Medium|Low\"\n    }\n  ]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1184,
+        16
+      ],
+      "id": "1f4718dd-91bf-4b40-861c-44120e97dfd5",
+      "name": "Revision Strategy Agent",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 422,
+          "responseKey": "Unable to process uploaded file"
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        416,
+        704
+      ],
+      "id": "119601bb-ae85-4e74-960f-2952a22a7eb1",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "content": "Document Preprocessing\n",
+        "height": 672,
+        "width": 774,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        272
+      ],
+      "id": "69cb887e-5791-434c-b445-1e1ee04f9488",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Revision Strategy Generation\n",
+        "height": 464,
+        "width": 864,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -48
+      ],
+      "id": "db191db2-6d78-4af4-8ef2-0dde61488264",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Flashcards Generation Agent",
+        "height": 416,
+        "width": 896
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        432
+      ],
+      "id": "7dda9216-e8c7-4230-88ea-27c5d115dffd",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Quiz Q&A Generation agent\n",
+        "height": 496,
+        "width": 896,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        928
+      ],
+      "id": "70ca07e2-0f89-4aae-b580-2c898cbcc3d3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Merging responses and responding to webhook request",
+        "height": 528,
+        "width": 832,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        288
+      ],
+      "id": "0a3adf8c-7281-4494-b224-90d8647dc42f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "\n",
+        "height": 1680,
+        "width": 3792,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -64
+      ],
+      "id": "f6ee430b-f817-41d9-b639-1fea6531f0b5",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "quiz_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"quiz\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"question_id\": { \"type\": \"integer\" },\n          \"difficulty\": { \"type\": \"integer\", \"minimum\": 1, \"maximum\": 5 },\n          \"question_text\": { \"type\": \"string\" },\n          \"distractors\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"minItems\": 3, \"maxItems\": 3 },\n          \"correct_answer\": { \"type\": \"string\" },\n          \"pedagogical_explanation\": { \"type\": \"string\" }\n        },\n        \"required\": [\"question_id\", \"difficulty\", \"question_text\", \"distractors\", \"correct_answer\", \"pedagogical_explanation\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"quiz\"],\n  \"additionalProperties\": false\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        1152
+      ],
+      "id": "657524dc-c061-41b1-a60c-b33123d87ffa",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "PZ07CY1D2u9sJPuW",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "verbosity": "low",
+              "name": "flashcards_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"flashcards\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\": { \"type\": \"integer\" },\n          \"term\": { \"type\": \"string\" },\n          \"definition\": { \"type\": \"string\" },\n          \"context_hint\": { \"type\": \"string\" }\n        },\n        \"required\": [\"id\", \"term\", \"definition\", \"context_hint\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"flashcards\"],\n  \"additionalProperties\": false\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        640
+      ],
+      "id": "b04c8c1f-cdee-4b89-b817-f5d1ebe9332e",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "PZ07CY1D2u9sJPuW",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "verbosity": "low",
+              "name": "revision_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"revision_plan\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"step_number\": { \"type\": \"integer\" },\n          \"module_title\": { \"type\": \"string\" },\n          \"key_learning_objectives\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } },\n          \"duration_minutes\": { \"type\": \"integer\" },\n          \"priority\": { \"type\": \"string\", \"enum\": [\"High\", \"Medium\", \"Low\"] }\n        },\n        \"required\": [\"step_number\", \"module_title\", \"key_learning_objectives\", \"duration_minutes\", \"priority\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"revision_plan\"],\n  \"additionalProperties\": false\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        208
+      ],
+      "id": "dd3d0d5d-dc9c-42ad-99ac-6129568b52b4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "PZ07CY1D2u9sJPuW",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 422,
+          "responseKey": "Unable to process uploaded file"
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1648,
+        304
+      ],
+      "id": "91033034-fac0-4c0e-a899-f7808935fbf9",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 422,
+          "responseKey": "Unable to process uploaded file"
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1648,
+        704
+      ],
+      "id": "699b1124-a7c6-4358-817d-4124dbd45685",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 422,
+          "responseKey": "Unable to process uploaded file"
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1696,
+        1296
+      ],
+      "id": "9a91175e-d9b1-48ac-930a-102ada62ff2a",
+      "name": "Respond to Webhook4"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-nano"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "quiz_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"quiz\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"question_id\": { \"type\": \"integer\" },\n          \"difficulty\": { \"type\": \"integer\", \"minimum\": 1, \"maximum\": 5 },\n          \"question_text\": { \"type\": \"string\" },\n          \"distractors\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"minItems\": 3, \"maxItems\": 3 },\n          \"correct_answer\": { \"type\": \"string\" },\n          \"pedagogical_explanation\": { \"type\": \"string\" }\n        },\n        \"required\": [\"question_id\", \"difficulty\", \"question_text\", \"distractors\", \"correct_answer\", \"pedagogical_explanation\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"quiz\"],\n  \"additionalProperties\": false\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1328,
+        1296
+      ],
+      "id": "23f5a0e6-4fdd-43f7-bebb-e8bdaaee6a1c",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "PZ07CY1D2u9sJPuW",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"quiz\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"question_id\": { \"type\": \"integer\" },\n          \"difficulty\": { \"type\": \"integer\", \"minimum\": 1, \"maximum\": 5 },\n          \"question_text\": { \"type\": \"string\" },\n          \"distractors\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"minItems\": 3, \"maxItems\": 3 },\n          \"correct_answer\": { \"type\": \"string\" },\n          \"pedagogical_explanation\": { \"type\": \"string\" }\n        },\n        \"required\": [\"question_id\", \"difficulty\", \"question_text\", \"distractors\", \"correct_answer\", \"pedagogical_explanation\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"quiz\"],\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1328,
+        1184
+      ],
+      "id": "a8ecef39-4aa4-43a6-8429-6c1b8a664cf2",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-nano"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "flashcards_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"flashcards\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\": { \"type\": \"integer\" },\n          \"term\": { \"type\": \"string\" },\n          \"definition\": { \"type\": \"string\" },\n          \"context_hint\": { \"type\": \"string\" }\n        },\n        \"required\": [\"id\", \"term\", \"definition\", \"context_hint\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"flashcards\"],\n  \"additionalProperties\": false\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        736
+      ],
+      "id": "7cb98b54-e4ad-4c7f-8eb3-a45c4b34c814",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "PZ07CY1D2u9sJPuW",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"flashcards\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\": { \"type\": \"integer\" },\n          \"term\": { \"type\": \"string\" },\n          \"definition\": { \"type\": \"string\" },\n          \"context_hint\": { \"type\": \"string\" }\n        },\n        \"required\": [\"id\", \"term\", \"definition\", \"context_hint\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"flashcards\"],\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        624
+      ],
+      "id": "85beaaa5-0054-4bdb-ba88-4b962a9a30e0",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-nano"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "revision_strategy_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"revision_plan\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"step_number\": { \"type\": \"integer\" },\n          \"module_title\": { \"type\": \"string\" },\n          \"key_learning_objectives\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } },\n          \"duration_minutes\": { \"type\": \"integer\" },\n          \"priority\": { \"type\": \"string\", \"enum\": [\"High\", \"Medium\", \"Low\"] }\n        },\n        \"required\": [\"step_number\", \"module_title\", \"key_learning_objectives\", \"duration_minutes\", \"priority\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"revision_plan\"],\n  \"additionalProperties\": false\n}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        304
+      ],
+      "id": "ba9b5938-1586-452b-80b2-66f2ad60dddc",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "PZ07CY1D2u9sJPuW",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"revision_plan\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"step_number\": { \"type\": \"integer\" },\n          \"module_title\": { \"type\": \"string\" },\n          \"key_learning_objectives\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } },\n          \"duration_minutes\": { \"type\": \"integer\" },\n          \"priority\": { \"type\": \"string\", \"enum\": [\"High\", \"Medium\", \"Low\"] }\n        },\n        \"required\": [\"step_number\", \"module_title\", \"key_learning_objectives\", \"duration_minutes\", \"priority\"],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"revision_plan\"],\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        192
+      ],
+      "id": "51c3d12f-8c64-4dcf-9e8d-50fea15cb7a2",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Flashcards agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Quiz Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Revision Strategy Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Revision Strategy Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Flashcards agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Quiz Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quiz Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flashcards agent": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revision Strategy Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Quiz Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Flashcards agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Revision Strategy Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Quiz Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Flashcards agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Revision Strategy Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "104c42c428b2aab430e80283bc30bd1adf3ec8a3c10a5bb1ce3c8d114d6c5c89"
+  }
+}
