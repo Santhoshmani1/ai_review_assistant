@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "revision_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_number": { "type": "integer" },
+          "module_title": { "type": "string" },
+          "key_learning_objectives": { "type": "array", "items": { "type": "string" } },
+          "duration_minutes": { "type": "integer" },
+          "priority": { "type": "string", "enum": ["High", "Medium", "Low"] }
+        },
+        "required": ["step_number", "module_title", "key_learning_objectives", "duration_minutes", "priority"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "revision_plan"
+  ],
+  "additionalProperties": false
+}

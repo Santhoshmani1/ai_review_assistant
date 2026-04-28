@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "quiz": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "question_text": { "type": "string" },
+          "distractors": { "type": "array", "items": { "type": "string" }, "minItems": 3, "maxItems": 3 },
+          "correct_answer": { "type": "string" },
+          "pedagogical_explanation": { "type": "string" }
+        },
+        "required": ["question_id", "difficulty", "question_text", "distractors", "correct_answer", "pedagogical_explanation"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "quiz"
+  ],
+  "additionalProperties": false
+}
