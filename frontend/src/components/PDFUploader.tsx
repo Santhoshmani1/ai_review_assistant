@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ interface UploadedFile {
   uploadedAt: Date
   status: 'pending' | 'uploading' | 'completed' | 'error'
   errorMessage?: string
-  responseData?: any // Field to store the webhook's JSON response
+  responseData?: any
 }
 
 const InteractiveFlashcard = ({ card }: { card: any }) => {
@@ -152,14 +152,59 @@ const RevisionTimeline = ({ plan }: { plan: any[] }) => {
   )
 }
 
+const AIProcessingStatus = ({ progress }: { progress: number }) => {
+  const [step, setStep] = useState(0)
+  const steps = [
+    { icon: '📄', text: 'Analyzing document...' },
+    { icon: '🧠', text: 'Extracting concepts...' },
+    { icon: '📅', text: 'Designing revision plan...' },
+    { icon: '🗂️', text: 'Generating flashcards...' },
+    { icon: '📝', text: 'Creating quizzes...' },
+    { icon: '✨', text: 'Finalizing materials...' }
+  ]
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStep((s) => (s + 1) % steps.length)
+    }, 10000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="flex flex-col gap-2 w-48 sm:w-64">
+      <div className="flex items-center justify-between text-xs font-semibold text-primary">
+        <div className="flex items-center gap-2 overflow-hidden relative w-full">
+          <svg className="animate-spin h-3.5 w-3.5 text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <div key={step} className="flex items-center gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500 absolute left-6">
+            <span className="text-sm">{steps[step].icon}</span>
+            <span className="truncate whitespace-nowrap bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">{steps[step].text}</span>
+          </div>
+        </div>
+        <span className="tabular-nums shrink-0 ml-2">{Math.round(progress)}%</span>
+      </div>
+      <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden shadow-inner mt-1">
+        <div
+          className="h-full bg-gradient-to-r from-primary/80 via-primary to-primary/80 transition-all duration-500 ease-out relative"
+          style={{ width: `${progress}%` }}
+        >
+          <div className="absolute inset-0 bg-white/20 text-white animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function PDFUploader() {
   const [files, setFiles] = useState<UploadedFile[]>([])
-  const [fileMap, setFileMap] = useState<{ [key: string]: File }>({})
+  const [_, setFileMap] = useState<{ [key: string]: File }>({})
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({})
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-  const N8N_WEBHOOK_URL = 'https://manicoursework.app.n8n.cloud/webhook-test/react-app'
+  const N8N_WEBHOOK_URL = 'https://poornishat.app.n8n.cloud/webhook/react-app'
 
   const validateFile = (file: File): string | null => {
     if (file.type !== 'application/pdf') {
@@ -415,17 +460,7 @@ export function PDFUploader() {
                       )}
 
                       {file.status === 'uploading' && (
-                        <div className="flex items-center gap-3 w-40">
-                          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary transition-all duration-300"
-                              style={{ width: `${uploadProgress[file.id] || 0}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs font-bold text-muted-foreground w-8 text-right">
-                            {Math.round(uploadProgress[file.id] || 0)}%
-                          </span>
-                        </div>
+                        <AIProcessingStatus progress={uploadProgress[file.id] || 0} />
                       )}
 
                       {file.status === 'completed' && (
